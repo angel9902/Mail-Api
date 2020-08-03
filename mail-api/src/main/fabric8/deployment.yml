@@ -1,0 +1,36 @@
+---
+kind: Deployment
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: mail-api
+          ports:
+          - name: app-port
+            containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: app-port
+            failureThreshold: 3
+            periodSeconds: 100
+          resources:
+            requests:
+              cpu: "0.2"
+              memory: 256Mi
+            limits:
+              cpu: "1.0"
+              memory: 512Mi
+          env:
+            - name: CONFIG_LOCATION
+              value: /data
+            - name: SPRING_CONFIG_LOCATION
+              value: /data/application.properties
+          volumeMounts:
+          - name: config-volume
+            mountPath: /data
+      volumes:
+      - name: config-volume
+        configMap:
+          name: mail-api-cm
